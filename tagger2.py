@@ -1,3 +1,5 @@
+STUDENT={'name': 'Coral Malachi_Daniel Braunstein',
+         'ID': '314882853_312510167'}
 import helper_funcs2 as my_helps_2
 
 
@@ -102,8 +104,6 @@ class NeuralNet(nn.Module):
     def __init__(self, input_size):
         super(NeuralNet, self).__init__()
 
-        # create the E matrix
-        # TODO: my_helps_2.
         self.E = nn.Embedding(my_helps_2.E.shape[0], my_helps_2.E.shape[1])
         self.E.weight.data.copy_(torch.from_numpy(my_helps_2.E))
         self.input_size = my_helps_2.E.shape[1] * window_size
@@ -111,16 +111,19 @@ class NeuralNet(nn.Module):
         self.fc1 = nn.Linear(DIM_HIDDEN_LAYER, len(my_helps_2.Dictionary_of_classes))
 
     ###############################################################
-    # Function Name:
-    # Function input:
+    # Function Name:forward
+    # Function input:x
     # Function output:none
-    # Function Action:
-    #
+    # Function Action:This is the forward propagation function
+    # #feed the neural networks firts time, and use activition function
+    # #to convert values to be between 0 to 1
     ################################################################
     def forward(self, x):
         x = self.E(x).view(-1, self.input_size)
+        #use the tanh as the activation function
         x = F.tanh(self.fc0(x))
         x = self.fc1(x)
+        #call softmax function
         x_softmax = F.log_softmax(x, dim=1)
         return x_softmax
 
@@ -192,18 +195,15 @@ def load_training_data_set(train_set_file):
 
 ###############################################################
 # Function Name:main
-# Function input:
+# Function input:argv
 # Function output:none
-# Function Action:
-#
+# Function Action:the function load all the data sets wee need for the assignment
+#create a moel of our neural network and start tarining action
 ################################################################
 def main(argv):
     # ner or pos (user input)
     folder_name_input = argv[0]
-    # global learning_rate
-    #
-    # if folder_name_input == 'ner':
-    #     learning_rate = 0.05
+
 
     # define a path for each dataset file
     path_test = folder_name_input + '/test'
@@ -216,12 +216,13 @@ def main(argv):
     set_of_dev = load_dev_data_set(path_dev)
     #
     dataset_test = load_test_set(path_test)
-    # # done splitting
+    #create a nueral net work object
     my_neural_network_model = NeuralNet(input_size=DIM_INPUT)
     optimizer = optim.Adam(my_neural_network_model.parameters(), lr=learning_rate)
-    #
-    trainer = Part1Model(optimizer, set_of_training, my_neural_network_model, dataset_test, set_of_dev)
-    trainer.Start_Action(folder_name_input)
+    #create a training object
+    training_object = Part1Model(optimizer, set_of_training, my_neural_network_model, dataset_test, set_of_dev)
+    #call start action object to start training the model
+    training_object.Start_Action(folder_name_input)
 
 
 ###############################################################
@@ -272,6 +273,35 @@ class Part1Model(object):
         self.nn_model = nn_model
         self.test_data = test_data
         self.dev_dataset = dev_dataset
+
+
+    ###############################################################
+    # Function Name:forward_test_data
+    # Function input:ner_or_pos
+    # Function output:none
+    # Function Action:This is the forward propagation function
+    #     # #feed the neural networks firts time, and use activition function
+    #     # #to convert values to be between 0 to 1
+    ################################################################
+    def forward_test_data(self, ner_or_pos):
+        self.nn_model.eval()
+        m_y_hats = []
+        for data in self.test_data:
+            the_model = self.nn_model(torch.LongTensor(data))
+            # call get_y_tag to find y_hat
+
+            pred = get_y_tag(the_model)
+
+            # append y_hat in the file of preds
+            m_y_hats.append(pred.item())
+
+            m_y_hats = self.Get_Representation_Of_Indexes_By_classes(m_y_hats)
+        # define the path to the test file - from where we'll get the data
+        path_to_test_file = ner_or_pos + "/test"
+        self.create_predictions_file(path_to_test_file, "test2." + ner_or_pos, m_y_hats)
+
+
+
 
     ###############################################################
     # Function Name:Get_Representation_Of_Indexes_By_classes
@@ -361,31 +391,7 @@ class Part1Model(object):
 
         print_message_each_epoch(0, m_count, iter_number, m_loss, m_success, 1, accuracy)
 
-    ###############################################################
-    # Function Name:forward_test_data
-    # Function input:ner_or_pos
-    # Function output:none
-    # Function Action:This is the forward propagation function
-    #     # #feed the neural networks firts time, and use activition function
-    #     # #to convert values to be between 0 to 1
-    ################################################################
-    def forward_test_data(self, ner_or_pos):
 
-        self.nn_model.eval()
-        m_y_hats = []
-        for data in self.test_data:
-            the_model = self.nn_model(torch.LongTensor(data))
-            #call get_y_tag to find y_hat
-
-            pred = get_y_tag(the_model)
-
-            #append y_hat in the file of preds
-            m_y_hats.append(pred.item())
-
-            m_y_hats = self.Get_Representation_Of_Indexes_By_classes(m_y_hats)
-        #define the path to the test file - from where we'll get the data
-        path_to_test_file = ner_or_pos + "/test"
-        self.create_predictions_file(path_to_test_file, "test2." + ner_or_pos, m_y_hats)
 
     ###############################################################
     # Function Name:create_predictions_file
