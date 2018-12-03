@@ -1,0 +1,33 @@
+STUDENT={'name': 'Coral Malachi_Daniel Braunstein',
+         'ID': '314882853_312510167'}
+part 1:
+
+relevant files:
+tagger1.py
+help_funcs.py
+
+in order to run the program the user needs to enter 1 argument - pos or ner, and according to his choice the program will load the correct database
+
+
+part 3:
+
+relevant files:
+tagger2.py
+helper_funcs2.py
+vocab.txt,
+wordVectors.txt
+
+in order to run the program the user needs to enter 1 argument - pos or ner, and according to his choice the program will load the correct database
+
+part4:
+relevant files:
+tagger3.py
+helper_funcs2.py
+help_funcs
+vocab.txt,
+wordVectors.txt
+
+in order to run the program the user needs to enter 2 argument -
+	1. pos or ner - according to his choice the program will load 			the correct database
+	2. 0 or 1 (tells the program which help file to choose - which 				way to predict)
+
